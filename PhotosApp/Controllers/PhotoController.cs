@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -13,6 +14,7 @@ using PhotosApp.Models;
 
 namespace PhotosApp.Controllers
 {
+    [Authorize]
     public class PhotoController : Controller
     {
         private readonly IPhotoRepository photoRepository;
@@ -26,6 +28,7 @@ namespace PhotosApp.Controllers
             this.mapper = mapper;
         }
 
+        [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
             var ownerId = GetOwnerId();
@@ -36,6 +39,7 @@ namespace PhotosApp.Controllers
             return View(model);
         }
 
+        [Authorize(Policy = "MustOwnPhoto")]
         public async Task<IActionResult> GetPhoto(Guid id)
         {
             var photoEntity = await photoRepository.GetPhotoAsync(id);
@@ -48,6 +52,8 @@ namespace PhotosApp.Controllers
             return View(model);
         }
 
+        [Authorize(Policy = "Beta")]
+        [Authorize(Policy = "MustOwnPhoto")]
         public async Task<IActionResult> EditPhoto(Guid id)
         {
             var photo = await photoRepository.GetPhotoAsync(id);
@@ -64,6 +70,7 @@ namespace PhotosApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "MustOwnPhoto")]
         public async Task<IActionResult> EditPhoto(EditPhotoModel editPhotoModel)
         {
             if (editPhotoModel == null || !ModelState.IsValid)
@@ -96,6 +103,7 @@ namespace PhotosApp.Controllers
             return RedirectToAction("Index");
         }
 
+        [Authorize(Policy = "CanAddPhoto")]
         public IActionResult AddPhoto()
         {
             return View();
@@ -103,6 +111,7 @@ namespace PhotosApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "CanAddPhoto")]
         public async Task<IActionResult> AddPhoto(AddPhotoModel addPhotoModel)
         {
             if (addPhotoModel == null || !ModelState.IsValid)
@@ -144,7 +153,7 @@ namespace PhotosApp.Controllers
 
         private string GetOwnerId()
         {
-            return "a83b72ed-3f99-44b5-aa32-f9d03e7eb1fd";
+            return User.FindFirstValue(ClaimTypes.NameIdentifier);
         }
     }
 }

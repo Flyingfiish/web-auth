@@ -70,9 +70,14 @@ namespace PhotosApp
             app.UseStatusCodePagesWithReExecute("/StatusCode/{0}");
 
             app.UseRouting();
+
+            app.UseAuthentication();
+            app.UseAuthorization();
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute("default", "{controller=Photo}/{action=Index}/{id?}");
+                endpoints.MapRazorPages();
             });
         }
     }
