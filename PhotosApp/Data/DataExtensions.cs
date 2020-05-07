@@ -23,9 +23,12 @@ namespace PhotosApp.Data
                     if (env.IsDevelopment())
                     {
                         scope.ServiceProvider.GetRequiredService<PhotosDbContext>().Database.Migrate();
+                        scope.ServiceProvider.GetRequiredService<UsersDbContext>().Database.Migrate();
 
                         var photosDbContext = scope.ServiceProvider.GetRequiredService<PhotosDbContext>();
                         photosDbContext.SeedWithSamplePhotosAsync().Wait();
+                        var usersManager = scope.ServiceProvider.GetRequiredService<UserManager<PhotoAppUser>>();
+                        usersManager.SeedWithSampleUsersAsync().Wait();
                     }
                 }
                 catch (Exception e)
