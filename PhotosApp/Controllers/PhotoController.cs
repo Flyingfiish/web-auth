@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -13,6 +14,8 @@ using PhotosApp.Models;
 
 namespace PhotosApp.Controllers
 {
+
+    [Authorize]
     public class PhotoController : Controller
     {
         private readonly IPhotoRepository photoRepository;
@@ -26,6 +29,7 @@ namespace PhotosApp.Controllers
             this.mapper = mapper;
         }
 
+        [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
             var ownerId = GetOwnerId();
@@ -35,6 +39,7 @@ namespace PhotosApp.Controllers
             var model = new PhotoIndexModel(photos.ToList());
             return View(model);
         }
+
 
         public async Task<IActionResult> GetPhoto(Guid id)
         {
@@ -144,7 +149,7 @@ namespace PhotosApp.Controllers
 
         private string GetOwnerId()
         {
-            return "a83b72ed-3f99-44b5-aa32-f9d03e7eb1fd";
+            return User.FindFirstValue(ClaimTypes.NameIdentifier);
         }
     }
 }
