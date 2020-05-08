@@ -1,4 +1,5 @@
 using System;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI;
@@ -18,10 +19,13 @@ namespace PhotosApp.Areas.Identity
         {
             builder.ConfigureServices((context, services) =>
             {
+                services.AddScoped<IPasswordHasher<PhotoAppUser>, SimplePasswordHasher<PhotoAppUser>>();
+
                 services.Configure<IdentityOptions>(options =>
                 {
                     // Default Password settings.
                     options.Password.RequireDigit = false;
+                    
                     options.Password.RequireLowercase = true;
                     options.Password.RequireNonAlphanumeric = false;
                     options.Password.RequireUppercase = true;
@@ -31,15 +35,29 @@ namespace PhotosApp.Areas.Identity
                     options.SignIn.RequireConfirmedAccount = false;
                     options.SignIn.RequireConfirmedEmail = false;
                     options.SignIn.RequireConfirmedPhoneNumber = false;
-
-
+                    
                 });
 
-                services.Configure<PasswordHasherOptions>(options =>
+                services.ConfigureApplicationCookie(options =>
+                {
+                    options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+                    options.Cookie.Name = "YourAppCookieName";
+                    options.Cookie.HttpOnly = true;
+                    options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+                    options.LoginPath = "/Identity/Account/Login";
+                    // ReturnUrlParameter requires 
+                    //using Microsoft.AspNetCore.Authentication.Cookies;
+                    options.ReturnUrlParameter = CookieAuthenticationDefaults.ReturnUrlParameter;
+                    options.SlidingExpiration = true;
+                    options.Cookie.Name = "PhotosApp.Auth";
+                });
+
+                /*services.Configure<PasswordHasherOptions>(options =>
                 {
                     options.CompatibilityMode = PasswordHasherCompatibilityMode.IdentityV3;
+                    
                     options.IterationCount = 12000;
-                });
+                });*/
 
 
                 services.AddDbContext<UsersDbContext>(options =>

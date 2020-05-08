@@ -31,17 +31,22 @@ namespace PhotosApp.Services
             return Convert.ToBase64String(hashedPasswordBytes);
         }
 
-        public PasswordVerificationResult VerifyHashedPassword(TUser user,
-            string hashedPassword, string providedPassword)
+        public PasswordVerificationResult VerifyHashedPassword(TUser user, string hashedPassword, string providedPassword)
         {
-            byte[] expectedSubkeyBytes = null;
-            byte[] actualSubkeyBytes = null;
+            byte[] hashedPasswordBytes = Convert.FromBase64String(hashedPassword);
+            byte[] saltBytes = new byte[SaltSize / 8];
+            Buffer.BlockCopy(hashedPasswordBytes, 0,
+            saltBytes, 0, saltBytes.Length);
 
-            throw new NotImplementedException();
+            byte[] expectedSubkeyBytes = new byte[hashedPasswordBytes.Length - saltBytes.Length];
+            Buffer.BlockCopy(hashedPasswordBytes, saltBytes.Length,
+            expectedSubkeyBytes, 0, expectedSubkeyBytes.Length);
+
+            byte[] actualSubkeyBytes = GetSubkeyBytes(providedPassword, saltBytes);
 
             return AreByteArraysEqual(actualSubkeyBytes, expectedSubkeyBytes)
-                ? PasswordVerificationResult.Success
-                : PasswordVerificationResult.Failed;
+            ? PasswordVerificationResult.Success
+            : PasswordVerificationResult.Failed;
         }
 
         private static byte[] GetSubkeyBytes(string password, byte[] saltBytes)
