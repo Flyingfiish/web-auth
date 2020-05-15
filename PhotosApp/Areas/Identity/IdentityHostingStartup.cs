@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PhotosApp.Areas.Identity.Data;
 using PhotosApp.Services;
+using PhotosApp.Services.Authorization;
 using PhotosApp.Services.TicketStores;
 
 [assembly: HostingStartup(typeof(PhotosApp.Areas.Identity.IdentityHostingStartup))]
@@ -61,12 +62,23 @@ namespace PhotosApp.Areas.Identity
                     options.Cookie.Name = "PhotosApp.Auth";
                 });
 
-                /*services.Configure<PasswordHasherOptions>(options =>
+                services.AddAuthorization(options =>
                 {
-                    options.CompatibilityMode = PasswordHasherCompatibilityMode.IdentityV3;
-                    
-                    options.IterationCount = 12000;
-                });*/
+                    options.AddPolicy(
+                        "Beta",
+                        policyBuilder =>
+                        {
+                            policyBuilder.RequireAuthenticatedUser();
+                            policyBuilder.RequireClaim("testing", "beta");
+                        });
+                    options.AddPolicy(
+                        "CanAddPhoto",
+                        policyBuilder =>
+                        {
+                            policyBuilder.RequireAuthenticatedUser();
+                            policyBuilder.RequireClaim("subscription", "paid");
+                        });
+                });
 
 
                 services.AddDbContext<UsersDbContext>(options =>
@@ -74,6 +86,8 @@ namespace PhotosApp.Areas.Identity
                         context.Configuration.GetConnectionString("UsersDbContextConnection")));
 
                 services.AddDefaultIdentity<PhotoAppUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddRoles<IdentityRole>()
+                .AddClaimsPrincipalFactory<CustomClaimsPrincipalFactory>()
                     .AddEntityFrameworkStores<UsersDbContext>()
                 .AddPasswordValidator<UsernameAsPasswordValidator<PhotoAppUser>>();
             });

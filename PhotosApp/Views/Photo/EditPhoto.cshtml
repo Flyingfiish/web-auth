@@ -1,4 +1,5 @@
 ﻿@model EditPhotoModel
+
 @{
     ViewData["Title"] = "Изменить подпись";
 }
@@ -9,13 +10,15 @@
             <h2>Изменить подпись у фото</h2>
             <div class="form-group">
                 <div><label asp-for="Title">Подпись к фото</label></div>
-                <input asp-for="Title"/>
+                <input asp-for="Title" />
             </div>
 
             <div class="form-group">
-                <div>
-                    <input type="submit" class="btn btn-primary" value="Изменить подпись"/>
-                </div>
+                
+                    <div>
+                        <input type="submit" class="btn btn-primary" value="Изменить подпись" />
+                    </div>
+                
             </div>
         </div>
     </div>

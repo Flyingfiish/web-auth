@@ -9,5 +9,6 @@ namespace PhotosApp.Areas.Identity.Data
     // Add profile data for application users by adding properties to the PhotoAppUser class
     public class PhotoAppUser : IdentityUser
     {
+        public bool Paid { get; set; }
     }
 }
