@@ -10,6 +10,7 @@ using PhotosApp.Clients;
 using PhotosApp.Clients.Models;
 using PhotosApp.Data;
 using PhotosApp.Models;
+using PhotosApp.Services.TicketStores;
 using Serilog;
 
 namespace PhotosApp
